@@ -77,6 +77,7 @@ def bt_search(algo, csp, variableHeuristic, allSolutions, trace):
         pass #print "Error. Unknown algorithm heursitics {}. Must be one of {}.".format(
             #algo, algorithms)
 
+    solutions = []
     uv = UnassignedVars(variableHeuristic,csp)
     Variable.clearUndoDict()
     for v in csp.variables():

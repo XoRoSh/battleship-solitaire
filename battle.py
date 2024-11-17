@@ -23,7 +23,6 @@ def print_solution(s, size):
     if verbose:
       print("Var n: {}, Value: {}".format(var.name(), val))
 
-  print("size", size)
   for i in range(size):
     for j in range(size):
       cur = s_[(i*size+j)]
@@ -78,15 +77,6 @@ file = open(args.inputfile, 'r')
 b = file.read()
 b2 = b.split()
 size = len(b2[4])
-# b3 = []
-# b3 += ['0' + b2[0] + '0']
-# b3 += ['0' + b2[1] + '0']
-# b3 += [b2[2] + ('0' if len(b2[2]) == 3 else '')]
-# b3 += ['0' * size]
-# for i in range(3, len(b2)):
-#   b3 += ['0' + b2[i] + '0']
-# b3 += ['0' * size]
-# board = "\n".join(b3)
 board = b2[3:] 
 rows = b.split()[0]
 cols = b.split()[1]
@@ -99,7 +89,6 @@ conslist = []
 for i in range(0,size):
   for j in range(0, size):
     v = None
-    # TODO: reduce domains (preprocessing) 
 
     # v = Variable(f"|r:{i} c:{j}|", [0,1])
     v = Variable(str((i*size+j)), [0,1])
@@ -114,28 +103,16 @@ board = [list(row) for row in b2[3:]]
 for i in range(size):
   for j in range(size):
     var = varn[str(i*size+j)]
+    # TODO: reduce domains (preprocessing) 
     if board[i][j] != '0' and board[i][j] != '.':
       var.resetDomain([1])
     if board[i][j] == '.':
       var.resetDomain([0])
 
-#row and column constraints on 1/0 variables
-# row_constraint = []
-# for i in rows:
-#   row_constraint += [int(i)]
-
-# print("size", size)
-# print("row_constraint", len(row_constraint))
 i = 0
 for row in range(size):
   conslist.append(NValuesConstraint(f'row{i}', [varn[str(row*size+col)] for col in range(size)], [1], int(rows[row]), int(rows[row])))
   i += 1
-
-# col_constraint = []
-# for i in cols:
-#   print("col i", i)
-#   col_constraint += [int(i)]
-# print("col_constraint", len(col_constraint))
 
 
 i = 0
@@ -144,10 +121,10 @@ for col in range(size):
   i += 1
 
 #diagonal constraints on 1/0 variables
-# for i in range(1, size-1):
-#     for j in range(1, size-1):
-#       conslist.append(NValuesConstraint('diag', [varn[str(i*size+j)], varn[str((i-1)*size+(j-1))]], [1], 0, 1))
-#       conslist.append(NValuesConstraint('diag', [varn[str(i*size+j)], varn[str((i-1)*size+(j+1))]], [1], 0, 1))
+for i in range(1, size-1):
+    for j in range(1, size-1):
+      conslist.append(NValuesConstraint('diag', [varn[str(i*size+j)], varn[str((i-1)*size+(j-1))]], [1], 0, 1))
+      conslist.append(NValuesConstraint('diag', [varn[str(i*size+j)], varn[str((i-1)*size+(j+1))]], [1], 0, 1))
 
 #./S/</>/v/^/M variables
 #these would be added to the csp as well, before searching,
@@ -172,14 +149,9 @@ print("Constraints:")
 for cons in csp.constraints():
   print(f"  {cons.name()}: Scope = {[v.name() for v in cons.scope()]}")
 
-solutions, num_nodes = bt_search('FC', csp, 'fixed', True, True)
+solutions, num_nodes = bt_search('FC', csp, 'mrv', True, True)
 
-print("  ")
-print("  ")
-print("  ")
-print("  ")
-# print(solutions)
-# sys.stdout = open(args.outputfile, 'w')
-# for i in range(len(solutions)):
-print_solution(solutions, size)
-print("--------------")
+sys.stdout = open(args.outputfile, 'w')
+for i in range(len(solutions)):
+  print_solution(solutions, size)
+  print("--------------")
