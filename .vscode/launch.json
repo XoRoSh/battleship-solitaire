@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "Launch Battle.py",
+            "program": "${workspaceFolder}/battle.py",
+            "args": [
+                "--inputfile",
+                "1",
+                "--outputfile",
+                "2"
+            ]
+        }
+    ],
+    "inputs": [
+        {
+            "type": "promptString",
+            "id": "inputFile",
+            "description": "Enter the input file path"
+        },
+        {
+            "type": "promptString",
+            "id": "outputFile",
+            "description": "Enter the output file path"
+        }
+    ]
+}
