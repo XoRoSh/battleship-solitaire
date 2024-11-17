@@ -107,12 +107,11 @@ class Variable:
 
     @staticmethod
     def restoreValues(reasonVar, reasonVal):
-        print("Restoring values for {} {}".format(reasonVar.name(), reasonVal))
         dkey = (reasonVar, reasonVal)
         if dkey in Variable.undoDict:
             for (var,val) in Variable.undoDict[dkey]:
-                print("Restoring value {} for variable {}\n".format(val, var.name()))
-                print("current Doamin:", var.curDomain())
+                # print("Restoring value {} for variable {}\n".format(val, var.name()))
+                # print("current Doamin:", var.curDomain())
                 var.restoreVal(val)
             del Variable.undoDict[dkey]
 

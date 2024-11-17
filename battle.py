@@ -3,19 +3,11 @@ from constraints import *
 from backtracking import bt_search
 import sys
 import argparse
+import time
 
-def print_solution_10(s, size):
-  s_ = {}
-  for var in s.items():
-    s_[int(var.name())] = val
-  for i in range(1, size-1):
-    for j in range(1, size-1):
-      print(s_[-1-(i*size+j)],end="")
-    print('')
-
+start_time = time.time()
 def print_solution(s, size):
   s_ = {}
-
 
   verbose = False
   for var, val in s:
@@ -109,6 +101,17 @@ for i in range(size):
     if board[i][j] == '.':
       var.resetDomain([0])
 
+for i in range(size):
+  if rows[i] == 0:
+    for j in range(size):
+      var = varn[str(i*size+j)]
+      var.resetDomain([0])
+  if cols[i] == 0:
+    for j in range(size):
+      var = varn[str(j*size+i)]
+      var.resetDomain([0])
+
+
 i = 0
 for row in range(size):
   conslist.append(NValuesConstraint(f'row{i}', [varn[str(row*size+col)] for col in range(size)], [1], int(rows[row]), int(rows[row])))
@@ -145,13 +148,15 @@ csp = CSP('battleship', varlist, conslist)
 print("CSP Name:", csp.name())
 for var in csp.variables():
   print(f"  {var.name()}: Domain = {var.curDomain()}")
-print("Constraints:")
-for cons in csp.constraints():
-  print(f"  {cons.name()}: Scope = {[v.name() for v in cons.scope()]}")
+# print("Constraints:")
+# for cons in csp.constraints():
+#   print(f"  {cons.name()}: Scope = {[v.name() for v in cons.scope()]}")
 
-solutions, num_nodes = bt_search('FC', csp, 'mrv', True, True)
+solutions, num_nodes = bt_search('FC', csp, 'mrv', True, False)
 
 sys.stdout = open(args.outputfile, 'w')
-for i in range(len(solutions)):
-  print_solution(solutions, size)
-  print("--------------")
+print_solution(solutions, size)
+print("--------------")
+
+sys.stdout = sys.__stdout__
+print(f"Time elapsed: {time.time() - start_time} seconds")

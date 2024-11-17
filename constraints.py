@@ -146,13 +146,13 @@ class NValuesConstraint(Constraint):
                 return True
         rv_count = 0
 
-        print ("Checking {} with assignments = {}".format(self.name(), assignments))
+        # print ("Checking {} with assignments = {}".format(self.name(), assignments))
 
         for v in assignments:
             if v in self._required:
                 rv_count += 1
 
-        print ("rv_count = {} test = {}".format(rv_count, self._lb <= rv_count and self._ub >= rv_count))
+        # print ("rv_count = {} test = {}".format(rv_count, self._lb <= rv_count and self._ub >= rv_count))
 
         return self._lb <= rv_count and self._ub >= rv_count
 
