@@ -258,9 +258,11 @@ for var in csp.variables():
 
 solutions, num_nodes = bt_search('FC', csp, 'fixed', True, False)
 
+print("Solution:", solutions)
 sys.stdout = open(args.outputfile, 'w')
-print_solution(solutions, size)
-print("--------------")
+for solution in solutions:
+  print_solution(solution, size)
+  print("--------------")
 
 sys.stdout = sys.__stdout__
 print(f"Time elapsed: {time.time() - start_time} seconds")

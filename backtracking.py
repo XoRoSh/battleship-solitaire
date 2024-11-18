@@ -116,7 +116,6 @@ def FCCheck(cnstr, assignedvar, assignedval):
         return "OK"
 
 def FC(unAssignedVars, csp, allSolutions, trace):
-    solutions = []
     if unAssignedVars.empty():
         if trace: 
             print ("{} Solution Found, printing variables:".format(csp.name()))
@@ -126,13 +125,14 @@ def FC(unAssignedVars, csp, allSolutions, trace):
                 print("Solution: ")
                 print (var.name(), var.getValue())
             soln.append((var, var.getValue()))
-        return soln
+        return [soln]
 
     bt_search.nodesExplored += 1
+    solutions = []
     nxtvar = unAssignedVars.extract() # Do mrv when extracting the next variable
+    if trace:  
+        print ("==> {} = {}".format(nxtvar.name(), val))
     for val in nxtvar.curDomain():
-        if trace:  
-            print ("==> {} = {}".format(nxtvar.name(), val))
         nxtvar.setValue(val)
         noDwo = True 
         for cnstr in csp.constraintsOf(nxtvar):
@@ -146,7 +146,11 @@ def FC(unAssignedVars, csp, allSolutions, trace):
                     noDwo = False
                     break 
         if noDwo: 
-            solutions.extend(FC(unAssignedVars, csp, allSolutions, trace))
+            new_solns = FC(unAssignedVars, csp, allSolutions, trace)
+            if new_solns:
+                solutions.extend(new_solns)
+            if len(solutions) > 0 and not allSolutions:
+                break # EXIT if found just 1 solution
         Variable.restoreValues(nxtvar, val)
     nxtvar.unAssign()
     unAssignedVars.insert(nxtvar)
