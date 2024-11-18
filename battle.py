@@ -34,7 +34,6 @@ def check_solution(s, ships):
       ship_len = 1
       for k in range(offset, size):
         if s_[(i*size+k)] == 1:
-          print(f"HUILO {i*size+j}")
 
           ship_len += 1
         else:
