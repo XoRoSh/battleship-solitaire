@@ -10,43 +10,124 @@ start_time = time.time()
 def pick_valid_solution(solutions, ships):
   for solution in solutions:
     if check_solution(solution, ships):
-
       return solution
 
 def check_solution(s, ships):
   s_ = {}
 
+  print(" ")
+  print(" ")
+  print(" ")
+  print(" ")
+  print(" ")
   for var, val in s:
     s_[int(var.name())] = val
   
-  print("SHIPS:", ships)
-  ships_in_reality = [0,0,0,0]
-  # Counting ships veritcally
+  valid = True
+
+  ships_in_reality = [0,0,0,0,0]
+  ship_found_h = False
+  ship_len = 0
   for i in range(size):
-    j = 0
-    found_ship = False
-    cur = s_[(i*size+j)]
-    print(f"Checking row {i}")
-    if cur == 1:
-      print("Ship found", i*size+j)
-      found_ship = True
-      offset = i*size+j+1
-      ship_len = 1
-      for k in range(offset, size):
-        if s_[(i*size+k)] == 1:
-
-          ship_len += 1
-        else:
+    for j in range(size): 
+      cur = s_[(i*size+j)]
+      if j < size - 1 and i < size - 1:
+        if s_.get((i*size+j+1)) == 1 and s_.get(((i+1)*size+j)) == 1: 
+          valid = False 
+      if ship_found_h == False and cur == 1:
+        # print("Ship found at", i, j)
+        ship_found_h = True
+      elif ship_found_h == True:
+        if cur == 1: 
+          if j == 0: 
+            ships_in_reality[ship_len] += 1
+            ship_len = 0
+          else:
+            ship_len += 1
+        elif j == 0:
           ships_in_reality[ship_len] += 1
-          print(f"Ship of length {ship_len} found at {i*size+j}")
-          print(f"Ship of type {ship_len}  in {ships_in_reality}")
-          break
-    if found_ship == True:
-      j += offset
-    else: 
-      j += 1
+          # print("Ship length:", ship_len + 1, "from", 6-ship_len-1, "to", 6-1, "at row", i-1)
+          # print("Ships rn:", ships_in_reality)
+          if cur != 1:
+            ship_len = 0
+            ship_found_h = False
+        elif cur == 0: 
+          ships_in_reality[ship_len] += 1
+          # print("Ship length:", ship_len + 1, "from", j-ship_len-1, "to", j-1, "at row", i)
+          # print("Ships rn:", ships_in_reality)
+          ship_len = 0
+          ship_found_h = False
+  if ship_found_h == True: 
+    ships_in_reality[ship_len] += 1
+    # print("Ships rn:", ships_in_reality)
 
-  # Counting horizontally
+
+  ships_v = [0,0,0,0,0]
+  ship_found_h = False
+  ship_len = 0
+  for j in range(size):
+    for i in range(size): 
+      cur = s_[(i*size+j)]
+      if ship_found_h == False and cur == 1:
+        ship_found_h = True
+        print("Ship found at", i, j)
+      elif ship_found_h == True:
+        if cur == 1: 
+          if i == 0: 
+            ships_v[ship_len] += 1
+            ship_len = 0
+          else:
+            ship_len += 1
+
+        elif i == 0:
+          ships_v[ship_len] += 1
+          # print("Ship length:", ship_len + 1, "from", 6-ship_len-1, "to", 6-1, "at col", j-1)
+          # print("Ships rn:", ships_v)
+          # if cur != 1:
+          ship_len = 0
+          ship_found_h = False
+        elif cur == 0: 
+          ships_v[ship_len] += 1
+          # print("Ship length:", ship_len + 1, "from", i-ship_len-1, "to", i-1, "at col", j)
+          # print("Ships rn:", ships_v)
+          ship_len = 0
+          ship_found_h = False
+        else: 
+          print("ERROR")
+  if ship_found_h == True: 
+    ships_v[ship_len] += 1
+    # print("Ships rn:", ships_v)
+  non_s_v = ships_v
+  non_s_h = ships_in_reality
+  print("SHIPSV:", ships_v)
+  print("SHIPSH:", ships_in_reality)
+
+  for i in range(1 ,len(non_s_h)):
+    ships_v[0] -= non_s_h[i] * (i+1)
+    ships_in_reality[0] -= non_s_v[i] * (i+1)
+
+  final = [ships_v[i] + ships_in_reality[i] for i in range(1,len(ships_in_reality))]
+  final.insert(0, ships_v[0])
+
+  if final != ships:
+    print("NONT VALID")
+    print("FINAL:",final )
+    print("SHips:", ships )
+    valid = False
+  else: 
+    print("VALID SOLUTION FOUND")
+    print("FINAL:",final )
+    print("SHips:", ships )
+    print("0")
+    sys.stdout = open(args.outputfile, 'w')
+    # for solution in solutions:
+    print_solution(s, size)
+    # print("--------------")
+    sys.stdout = sys.__stdout__
+
+  return valid
+
+
 
 
 def print_solution(s, size):
@@ -304,12 +385,6 @@ print("CSP Name:", csp.name())
 solutions, num_nodes = bt_search('FC', csp, 'fixed', True, False)
 
 # print("Solution:", solutions)
-sys.stdout = open(args.outputfile, 'w')
+solution = pick_valid_solution(solutions, ships)
 
-# solution = pick_valid_solution(solutions, ships)
-for solution in solutions:
-  print_solution(solution, size)
-  print("--------------")
-
-sys.stdout = sys.__stdout__
 print(f"Time elapsed: {time.time() - start_time} seconds")
