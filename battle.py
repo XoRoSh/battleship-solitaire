@@ -70,8 +70,9 @@ b = file.read()
 b2 = b.split()
 size = len(b2[4])
 board = b2[3:] 
-rows = b.split()[0]
-cols = b.split()[1]
+cols = list(map(int, b.split()[1]))
+rows = list(map(int, b.split()[0]))
+
 
 varlist = []
 varn = {}
@@ -101,15 +102,20 @@ for i in range(size):
     if board[i][j] == '.':
       var.resetDomain([0])
 
+print("rows:", rows)
+print("cols:", cols)
 for i in range(size):
   if rows[i] == 0:
     for j in range(size):
       var = varn[str(i*size+j)]
       var.resetDomain([0])
+      var.restoreCurDomain()
+      print(f"resetting {i*size+j} to 0")
   if cols[i] == 0:
     for j in range(size):
       var = varn[str(j*size+i)]
       var.resetDomain([0])
+      var.restoreCurDomain()
 
 
 i = 0
@@ -154,7 +160,7 @@ for var in csp.variables():
 
 solutions, num_nodes = bt_search('FC', csp, 'mrv', True, False)
 
-sys.stdout = open(args.outputfile, 'w')
+# sys.stdout = open(args.outputfile, 'w')
 print_solution(solutions, size)
 print("--------------")
 
