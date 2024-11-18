@@ -36,6 +36,11 @@ class Variable:
         '''Return the size of the domain'''
         return(len(self.domain()))
 
+    def restoreDomains(self, newdomain):
+        '''restore the domain of this variable'''
+        self._dom = newdomain
+        self._curdom = newdomain
+    
     def resetDomain(self, newdomain):
         '''reset the domain of this variable'''
         self._dom = newdomain
@@ -93,6 +98,8 @@ class Variable:
 
     def restoreCurDomain(self):
         self._curdom = self.domain()
+
+
 
     def reset(self):
         self.restoreCurDomain()

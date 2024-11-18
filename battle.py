@@ -48,6 +48,65 @@ def print_solution(s, size):
         print("UNEXPECTED CHARACTER")
     print('')
 
+
+def set_right(varn, i, j, domain):
+  if j < size:
+    var = varn[str(i*size+j+1)]
+    var.restoreDomains(domain)
+    print(f"setting r:{i}, c:{j+1} to 0")
+
+def set_left(varn, i, j, domain):
+  if j > 0:
+    var = varn[str(i*size+j-1)]
+    var.restoreDomains(domain)
+    print(f"setting r:{i}, c:{j-1} to 0")
+
+def set_top(varn, i, j, domain):
+  if i > 0:
+    var = varn[str((i-1)*size+j)]
+    var.restoreDomains(domain)
+    print(f"setting r:{i-1}, c:{j} to 0")
+
+def set_top_right(varn, i, j, domain):
+  if j < size and i > 0:
+    var = varn[str((i-1)*size+j+1)]
+    var.restoreDomains(domain)
+    print(f"setting r:{i-1}, c:{j+1} to 0")
+
+def set_top_left(varn, i, j, domain):
+  if j > 0 and i > 0:
+    var = varn[str((i-1)*size+j-1)]
+    var.restoreDomains(domain)
+    print(f"setting r:{i-1}, c:{j-1} to 0")
+
+def set_bot(varn, i, j, domain):
+  if i < size:
+    var = varn[str((i+1)*size+j)]
+    var.restoreDomains(domain)
+    print(f"setting r:{i+1}, c:{j} to 0")
+
+def set_bot_right(varn, i, j, domain):
+  if i < size and j < size:
+    var = varn[str((i+1)*size+j+1)]
+    var.restoreDomains(domain)
+    print(f"setting r:{i+1}, c:{j+1} to 0")
+
+def set_bot_left(varn, i, j, domain):
+  if i < size and j > 0:
+    var = varn[str((i+1)*size+j-1)]
+    var.restoreDomains(domain)
+    print(f"setting r:{i+1}, c:{j-1} to 0")
+
+def set_around(varn, i, j, domain):
+  set_right(varn, i, j, domain)
+  set_left(varn, i, j, domain)
+  set_top(varn, i, j, domain)
+  set_bot(varn, i, j, domain)
+  set_top_right(varn, i, j, domain)
+  set_top_left(varn, i, j, domain)
+  set_bot_right(varn, i, j, domain)
+  set_bot_left(varn, i, j, domain)
+
 #parse board and ships info
 #file = open(sys.argv[1], 'r')
 #b = file.read()
@@ -90,32 +149,57 @@ for i in range(0,size):
 
 
 
+
 #make 1/0 variables match board info
 board = [list(row) for row in b2[3:]]
 
+# Restricting domains of variables based on board
+print("board:", board)
+count = 0
 for i in range(size):
   for j in range(size):
     var = varn[str(i*size+j)]
-    # TODO: reduce domains (preprocessing) 
-    if board[i][j] != '0' and board[i][j] != '.':
-      var.resetDomain([1])
     if board[i][j] == '.':
-      var.resetDomain([0])
+      var.restoreDomains([0])
+    elif board [i][j] != '0': 
+      var.restoreDomains([1])
+      set_around(varn, i, j, [0])
+      if board[i][j] == 'S':
+        pass
+      elif board[i][j] == '<':
+        set_right(varn, i, j, [0, 1]) #TODO add H as hint to domain that its M or >?
 
-print("rows:", rows)
-print("cols:", cols)
+        set_top_right(varn, i, j+1, [0])
+        set_bot_right(varn, i, j+1, [0])
+      elif board[i][j] == '>':
+        set_left(varn, i, j, [0, 1])
+
+        set_top_left(varn, i, j-1, [0])
+        set_bot_left(varn, i, j-1, [0])
+      elif board[i][j] == '^':
+        set_bot(varn, i, j, [0, 1])
+
+        set_bot_left(varn, i+1, j, [0])
+        set_bot_right(varn, i+1, j, [0])
+      elif board[i][j] == 'v':
+        set_top(varn, i, j, [0, 1])
+
+        set_top_left(varn, i-1, j, [0])
+        set_top_right(varn, i-1, j, [0])
+
+
+
+# Setting rows and cols that are 0 to 0
 for i in range(size):
   if rows[i] == 0:
     for j in range(size):
       var = varn[str(i*size+j)]
-      var.resetDomain([0])
-      var.restoreCurDomain()
+      var.restoreDomains([0])
       print(f"resetting {i*size+j} to 0")
   if cols[i] == 0:
     for j in range(size):
       var = varn[str(j*size+i)]
-      var.resetDomain([0])
-      var.restoreCurDomain()
+      var.restoreDomains([0])
 
 
 i = 0
@@ -152,15 +236,29 @@ for i in range(1, size-1):
 #find all solutions and check which one has right ship #'s
 csp = CSP('battleship', varlist, conslist)
 print("CSP Name:", csp.name())
+
+print(" ")
+c = 1 
+str = ""
 for var in csp.variables():
-  print(f"  {var.name()}: Domain = {var.curDomain()}")
+  if var.domainSize() == 1:
+    str += ("1 ")
+  if var.domainSize() == 2:
+    str += "0 "
+  if c == size:
+    print(str)
+    str = ""
+    c = 0
+  c += 1
+
+  
 # print("Constraints:")
 # for cons in csp.constraints():
 #   print(f"  {cons.name()}: Scope = {[v.name() for v in cons.scope()]}")
 
-solutions, num_nodes = bt_search('FC', csp, 'mrv', True, False)
+solutions, num_nodes = bt_search('FC', csp, 'fixed', True, False)
 
-# sys.stdout = open(args.outputfile, 'w')
+sys.stdout = open(args.outputfile, 'w')
 print_solution(solutions, size)
 print("--------------")
 
