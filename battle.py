@@ -305,11 +305,12 @@ print("CSP Name:", csp.name())
 solutions, num_nodes = bt_search('FC', csp, 'fixed', True, False)
 
 # print("Solution:", solutions)
-# sys.stdout = open(args.outputfile, 'w')
+sys.stdout = open(args.outputfile, 'w')
 
-solution = pick_valid_solution(solutions, ships)
-# print_solution(solutions[0], size)
-print("--------------")
+# solution = pick_valid_solution(solutions, ships)
+for solution in solutions:
+  print_solution(solution, size)
+  print("--------------")
 
 sys.stdout = sys.__stdout__
 print(f"Time elapsed: {time.time() - start_time} seconds")
