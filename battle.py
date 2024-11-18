@@ -6,6 +6,50 @@ import argparse
 import time
 
 start_time = time.time()
+
+def pick_valid_solution(solutions, ships):
+  for solution in solutions:
+    if check_solution(solution, ships):
+
+      return solution
+
+def check_solution(s, ships):
+  s_ = {}
+
+  for var, val in s:
+    s_[int(var.name())] = val
+  
+  print("SHIPS:", ships)
+  ships_in_reality = [0,0,0,0]
+  # Counting ships veritcally
+  for i in range(size):
+    j = 0
+    found_ship = False
+    cur = s_[(i*size+j)]
+    print(f"Checking row {i}")
+    if cur == 1:
+      print("Ship found", i*size+j)
+      found_ship = True
+      offset = i*size+j+1
+      ship_len = 1
+      for k in range(offset, size):
+        if s_[(i*size+k)] == 1:
+          print(f"HUILO {i*size+j}")
+
+          ship_len += 1
+        else:
+          ships_in_reality[ship_len] += 1
+          print(f"Ship of length {ship_len} found at {i*size+j}")
+          print(f"Ship of type {ship_len}  in {ships_in_reality}")
+          break
+    if found_ship == True:
+      j += offset
+    else: 
+      j += 1
+
+  # Counting horizontally
+
+
 def print_solution(s, size):
   s_ = {}
 
@@ -131,6 +175,7 @@ size = len(b2[4])
 board = b2[3:] 
 cols = list(map(int, b.split()[1]))
 rows = list(map(int, b.split()[0]))
+ships = list(map(int, b.split()[2]))
 
 
 varlist = []
@@ -237,19 +282,20 @@ for i in range(1, size-1):
 csp = CSP('battleship', varlist, conslist)
 print("CSP Name:", csp.name())
 
-print(" ")
-c = 1 
-str = ""
-for var in csp.variables():
-  if var.domainSize() == 1:
-    str += ("1 ")
-  if var.domainSize() == 2:
-    str += "0 "
-  if c == size:
-    print(str)
-    str = ""
-    c = 0
-  c += 1
+# # PRINTING THE INITIAL PREPROCESING DOMAIN
+# print(" ")
+# c = 1 
+# str = ""
+# for var in csp.variables():
+#   if var.domainSize() == 1:
+#     str += ("1 ")
+#   if var.domainSize() == 2:
+#     str += "0 "
+#   if c == size:
+#     print(str)
+#     str = ""
+#     c = 0
+#   c += 1
 
   
 # print("Constraints:")
@@ -258,11 +304,12 @@ for var in csp.variables():
 
 solutions, num_nodes = bt_search('FC', csp, 'fixed', True, False)
 
-print("Solution:", solutions)
-sys.stdout = open(args.outputfile, 'w')
-for solution in solutions:
-  print_solution(solution, size)
-  print("--------------")
+# print("Solution:", solutions)
+# sys.stdout = open(args.outputfile, 'w')
+
+solution = pick_valid_solution(solutions, ships)
+# print_solution(solutions[0], size)
+print("--------------")
 
 sys.stdout = sys.__stdout__
 print(f"Time elapsed: {time.time() - start_time} seconds")
